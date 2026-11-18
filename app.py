@@ -3,7 +3,7 @@ import plotly.express as px
 import streamlit as st
 
 
-df = cargar_datos()
+
 # ==========================================
 # 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS
 # ==========================================
@@ -60,9 +60,9 @@ st.markdown(
 # ==========================================
 # Ajusta estos nombres si en tu Excel están escritos diferente:
 COL_CARRERA = "Carrera"
-COL_TIPO_EXAMEN = "Examen"
 COL_CARNET = "Reg. Académico"
 COL_FECHA = "Fecha solicitada"
+COL_TIPO_EXAMEN = "Tipo de examen"
 # Lista de columnas donde aparecen los examinadores de la terna:
 COLS_EXAMINADORES = [
     "Examinador 1",
@@ -125,9 +125,11 @@ try:
     df_raw = cargar_datos()
 except Exception as e:
     st.error(
-        f"Error al leer '{ARCHIVO_EXCEL}'. Verifica que esté en la misma carpeta y tenga las columnas correctas. Detalle: {e}"
+        f"Error al leer los datos desde Google Sheets. Detalle: {e}"
     )
     st.stop()
+
+
 
 # ==========================================
 # 4. ENCABEZADO Y BARRA DE FILTROS
