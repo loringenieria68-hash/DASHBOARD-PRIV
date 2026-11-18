@@ -1,7 +1,9 @@
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-
+import io
+import requests
 
 
 # ==========================================
@@ -79,7 +81,11 @@ URL = st.secrets["GSHEET_URL"]
 
 @st.cache_data(ttl=60)
 def cargar_datos():
-    df = pd.read_csv(URL)
+
+    respuesta = requests.get(URL, timeout=30)
+    respuesta.raise_for_status()
+    df = pd.read_excel(io.BytesIO(respuesta.content), sheet_name=0, dtype=str)
+    
     df.columns = df.columns.str.strip()  # Limpia espacios extra en encabezados
 
     # Extraer Año de ingreso de los primeros 4 dígitos del carnet
