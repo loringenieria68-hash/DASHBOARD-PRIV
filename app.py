@@ -2,8 +2,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-URL = st.secrets["https://docs.google.com/spreadsheets/d/e/2PACX-1vTfx9MDCxIQjOM00aL90GD9F7SzYP23Yq-mwljbBeXfaL-TyZd0-zuz4hBNgBO6noOIn80GzNHGEjrT/pubhtml?gid=28556863&single=true"]  
 
+df = cargar_datos()
 # ==========================================
 # 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS
 # ==========================================
@@ -59,7 +59,6 @@ st.markdown(
 # 2. CONFIGURACIÓN DE COLUMNAS DE TU EXCEL
 # ==========================================
 # Ajusta estos nombres si en tu Excel están escritos diferente:
-ARCHIVO_EXCEL = "datosPriv.xlsx"
 COL_CARRERA = "Carrera"
 COL_TIPO_EXAMEN = "Examen"
 COL_CARNET = "Reg. Académico"
@@ -73,22 +72,28 @@ COLS_EXAMINADORES = [
 ]
 
 
-# ==========================================
+## ==========================================
 # 3. CARGA Y LIMPIEZA DE DATOS
 # ==========================================
+URL = st.secrets["GSHEET_URL"]
+
+@st.cache_data(ttl=60)
 def cargar_datos():
-    df = pd.read_excel(ARCHIVO_EXCEL)
+    df = pd.read_csv(URL)
     df.columns = df.columns.str.strip()  # Limpia espacios extra en encabezados
 
     # Extraer Año de ingreso de los primeros 4 dígitos del carnet
     df["Año_Ingreso"] = (
         df[COL_CARNET].astype(str).str.strip().str[:4]
     )
-    # Limpiar posibles decimales si Excel leyó el carnet como número (ej. 201901.0)
     df["Año_Ingreso"] = df["Año_Ingreso"].str.replace(".0", "", regex=False)
 
+    # Eliminar el carnet ahora que ya extrajimos el año (para no exponer datos personales)
+    df = df.drop(columns=[COL_CARNET], errors="ignore")
+
     # Procesar fechas para Mes y Semana (lunes de cada semana)
-    df["Fecha_dt"] = pd.to_datetime(df[COL_FECHA], errors="coerce")
+    df["Fecha_dt"] = pd.to_datetime(df[COL_FECHA], dayfirst=True, errors="coerce")
+
 
     meses_es = {
         1: "01 - Enero",
